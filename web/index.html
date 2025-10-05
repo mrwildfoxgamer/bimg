@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Deep Zoom Sky Map with Hover Icons</title>
+
+    <style>
+
+        body, html {
+
+            width: 100%;
+
+            height: 100%;
+
+            margin: 0;
+
+            padding: 0;
+
+            overflow: hidden;
+
+            background-color: #000;
+
+        }
+
+        #openseadragon-viewer {
+
+            width: 100%;
+
+            height: 100%;
+
+        }
+
+
+        /* Styles for the small icon (the clickable dot) */
+
+        .overlay-icon {
+
+            width: 20px; /* Size of your icon */
+
+            height: 20px;
+
+            background-color: gold; /* Example: a gold dot */
+
+            border-radius: 50%; /* Makes it a circle */
+
+            border: 2px solid white;
+
+            cursor: pointer; /* Indicates it's interactive */
+
+            position: relative; /* Needed for z-index to work reliably */
+
+            z-index: 10; /* Ensure icons are above other elements */
+
+            display: flex; /* For centering content if needed */
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 10px; /* Optional: text inside icon */
+
+            color: black;
+
+            font-weight: bold;
+
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.7); /* Subtle glow */
+
+        }
+
+
+        /* Styles for the actual celestial image (hidden by default) */
+
+        .celestial-image {
+
+            opacity: 0; /* Hidden by default */
+
+            transition: opacity 0.3s ease-in-out; /* Smooth fade */
+
+            pointer-events: none; /* Prevent image from capturing mouse events */
+
+            position: absolute; /* Ensures it can be positioned relative to viewer */
+
+            z-index: 5; /* Image should be behind the icon but above the DZI */
+
+        }
+
+
+        .celestial-image.visible {
+
+            opacity: 1; /* Visible when 'visible' class is added */
+
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+
+
+    <div id="openseadragon-viewer"></div>
+
+
+    <script src="./openseadragon/openseadragon.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        var viewer = OpenSeadragon({
+
+            id: "openseadragon-viewer",
+
+            prefixUrl: "./openseadragon/images/",
+
+            tileSources: "myimage.dzi"
+
+        });
+
+
+        const overlaysData = [
+
+    {
+
+        "id": "galaxy1",
+
+        "url": "./overlays/galaxy1.png",
+
+        "x": 0.15,
+
+        "y": 0.23,
+
+        "imgWidth": 0.04,
+
+        "iconLabel": "G1"
+
+    },
+
+    {
+
+        "id": "galaxy2",
+
+        "url": "./overlays/galaxy2.png",
+
+        "x": 0.78,
+
+        "y": 0.45,
+
+        "imgWidth": 0.05,
+
+        "iconLabel": "G2"
+
+    },
+
+    {
+
+        "id": "galaxy3",
+
+        "url": "./overlays/galaxy3.png",
+
+        "x": 0.42,
+
+        "y": 0.81,
+
+        "imgWidth": 0.03,
+
+        "iconLabel": "G3"
+
+    },
+
+    {
+
+        "id": "galaxy4",
+
+        "url": "./overlays/galaxy4.png",
+
+        "x": 0.66,
+
+        "y": 0.12,
+
+        "imgWidth": 0.045,
+
+        "iconLabel": "G4"
+
+    },
+
+    {
+
+        "id": "galaxy5",
+
+        "url": "./overlays/galaxy5.png",
+
+        "x": 0.29,
+
+        "y": 0.67,
+
+        "imgWidth": 0.02,
+
+        "iconLabel": "G5"
+
+    },
+
+    {
+
+        "id": "galaxy6",
+
+        "url": "./overlays/galaxy6.png",
+
+        "x": 0.91,
+
+        "y": 0.58,
+
+        "imgWidth": 0.05,
+
+        "iconLabel": "G6"
+
+    },
+
+    {
+
+        "id": "galaxy7",
+
+        "url": "./overlays/galaxy7.png",
+
+        "x": 0.08,
+
+        "y": 0.93,
+
+        "imgWidth": 0.03,
+
+        "iconLabel": "G7"
+
+    },
+
+    {
+
+        "id": "galaxy8",
+
+        "url": "./overlays/galaxy8.png",
+
+        "x": 0.53,
+
+        "y": 0.05,
+
+        "imgWidth": 0.04,
+
+        "iconLabel": "G8"
+
+    },
+
+    {
+
+        "id": "galaxy9",
+
+        "url": "./overlays/galaxy9.png",
+
+        "x": 0.37,
+
+        "y": 0.39,
+
+        "imgWidth": 0.025,
+
+        "iconLabel": "G9"
+
+    },
+
+    {
+
+        "id": "nebula1",
+
+        "url": "./overlays/nebula1.png",
+
+        "x": 0.88,
+
+        "y": 0.21,
+
+        "imgWidth": 0.015,
+
+        "iconLabel": "N1"
+
+    },
+
+    {
+
+        "id": "nebula2",
+
+        "url": "./overlays/nebula2.png",
+
+        "x": 0.22,
+
+        "y": 0.55,
+
+        "imgWidth": 0.01,
+
+        "iconLabel": "N2"
+
+    },
+
+    {
+
+        "id": "nebula3",
+
+        "url": "./overlays/nebula3.png",
+
+        "x": 0.59,
+
+        "y": 0.88,
+
+        "imgWidth": 0.02,
+
+        "iconLabel": "N3"
+
+    },
+
+    {
+
+        "id": "nebula4",
+
+        "url": "./overlays/nebula4.png",
+
+        "x": 0.11,
+
+        "y": 0.09,
+
+        "imgWidth": 0.01,
+
+        "iconLabel": "N4"
+
+    },
+
+    {
+
+        "id": "nebula5",
+
+        "url": "./overlays/nebula5.png",
+
+        "x": 0.74,
+
+        "y": 0.72,
+
+        "imgWidth": 0.015,
+
+        "iconLabel": "N5"
+
+    },
+
+    {
+
+        "id": "nebula6",
+
+        "url": "./overlays/nebula6.png",
+
+        "x": 0.33,
+
+        "y": 0.18,
+
+        "imgWidth": 0.01,
+
+        "iconLabel": "N6"
+
+    },
+
+    {
+
+        "id": "nebula7",
+
+        "url": "./overlays/nebula7.png",
+
+        "x": 0.95,
+
+        "y": 0.96,
+
+        "imgWidth": 0.02,
+
+        "iconLabel": "N7"
+
+    },
+
+    {
+
+        "id": "nebula8",
+
+        "url": "./overlays/nebula8.png",
+
+        "x": 0.04,
+
+        "y": 0.49,
+
+        "imgWidth": 0.015,
+
+        "iconLabel": "N8"
+
+    },
+
+    {
+
+        "id": "nebula9",
+
+        "url": "./overlays/nebula9.png",
+
+        "x": 0.5,
+
+        "y": 0.5,
+
+        "imgWidth": 0.01,
+
+        "iconLabel": "N9"
+
+    }
+
+]
+
+        viewer.addHandler('open', function() {
+
+            overlaysData.forEach((data, index) => {
+
+                // 1. Create the ICON element
+
+                var iconElement = document.createElement("div");
+
+                iconElement.id = 'icon-' + data.id;
+
+                iconElement.className = 'overlay-icon';
+
+                iconElement.textContent = data.iconLabel || (index + 1); // Display label or number
+
+                
+
+                // 2. Create the ACTUAL IMAGE element
+
+                var imageElement = document.createElement("img");
+
+                imageElement.id = 'img-' + data.id;
+
+                imageElement.src = data.url;
+
+                imageElement.className = 'celestial-image'; // Initially hidden
+
+
+                // Add the icon to the viewer
+
+                viewer.addOverlay({
+
+                    element: iconElement,
+
+                    location: new OpenSeadragon.Point(data.x, data.y),
+
+                    placement: OpenSeadragon.OverlayPlacement.CENTER // Center the icon on the point
+
+                });
+
+
+                // Add the image to the viewer
+
+                // Note: The image's location will be the same as the icon's,
+
+                // but its size is defined by imgWidth. We'll adjust its visual
+
+                // placement slightly in the CSS if needed, or by adjusting its X/Y
+
+                // relative to the icon if you want it to appear *next* to the icon.
+
+                viewer.addOverlay({
+
+                    element: imageElement,
+
+                    location: new OpenSeadragon.Point(data.x, data.y),
+
+                    width: data.imgWidth,
+
+                    // Optional: adjust placement of the image relative to its point
+
+                    // For example, to make it appear to the bottom-right of the icon:
+
+                    // placement: OpenSeadragon.OverlayPlacement.BOTTOM_RIGHT
+
+                    placement: OpenSeadragon.OverlayPlacement.CENTER // Centered on the same point for now
+
+                });
+
+                
+
+                // 3. Add event listeners to the icon
+
+                iconElement.addEventListener('mouseenter', function() {
+
+                    imageElement.classList.add('visible');
+
+                });
+
+
+                iconElement.addEventListener('mouseleave', function() {
+
+                    imageElement.classList.remove('visible');
+
+                });
+
+            });
+
+        });
+
+
+    </script>
+
+
+</body>
+
+</html>
+
